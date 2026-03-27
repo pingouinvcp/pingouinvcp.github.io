@@ -1,0 +1,133 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  background: #111;
+  color: white;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  padding: 20px;
+  background: #000;
+}
+
+header input {
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+}
+
+.categoria {
+  padding: 20px;
+}
+
+.productos {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: #1c1c1c;
+  padding: 15px;
+  border-radius: 15px;
+  width: 150px;
+  text-align: center;
+  transition: 0.3s;
+}
+
+.card:hover {
+  transform: scale(1.05);
+}
+
+.card img {
+  width: 100%;
+  border-radius: 10px;
+}
+
+button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  border: none;
+  background: white;
+  color: black;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.extra {
+  display: none;
+}
+.scroll-container {
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+
+.productos {
+  display: flex;
+  gap: 20px;
+  min-width: max-content;
+}
+.ver-mas {
+  position: relative;
+  width: 180px;
+  height: 265px;
+  overflow: hidden;
+  border-radius: 15px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+/* Imagen se adapta SIN deformarse */
+.ver-mas .bg {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* clave */
+  top: 0;
+  left: 0;
+}
+
+/* Oscurecido */
+.ver-mas::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  transition: 0.3s;
+}
+
+/* Hover */
+.ver-mas:hover::after {
+  background: rgba(0,0,0,0.6);
+}
+
+/* Texto encima SIEMPRE */
+.ver-mas .texto {
+  position: relative;
+  z-index: 2;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.logo {
+  display: block;
+  margin: 0 auto;
+  height: 150px;
+}
+header {
+  position: relative;
+  height: 150px; /* o el alto que tenga tu header */
+}
+
+header input {
+  height: 30px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
