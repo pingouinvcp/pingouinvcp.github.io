@@ -1,0 +1,1360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Catálogo - Pingouin Parfums</title>
+  <link rel="icon" href="logopag.png">
+  <!-- Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: #0a0a0a;
+      color: #f0f0f0;
+      overflow-x: hidden;
+      width: 100%;
+    }
+
+    /* HEADER CON MENÚ DESPLEGABLE */
+    header {
+      background: #000000;
+      padding: 0 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+      gap: 12px;
+    }
+
+    .dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .dropdown-btn {
+      background: #2c2c2c;
+      border: none;
+      color: #f0f0f0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 20px;
+      height: 48px;
+      border-radius: 60px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .dropdown-btn .material-icons {
+      font-size: 22px;
+    }
+
+    .dropdown-btn:hover {
+      background: #e63946;
+      transform: translateY(-2px);
+    }
+
+    .dropdown-btn:active {
+      transform: scale(0.96);
+    }
+
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 8px;
+      background: #1e1e1e;
+      min-width: 180px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      overflow: hidden;
+      z-index: 200;
+      border: 1px solid #3a3a3a;
+    }
+
+    .dropdown-content a {
+      color: #f0f0f0;
+      padding: 14px 20px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.95rem;
+      font-weight: 500;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .dropdown-content a .material-icons {
+      font-size: 20px;
+    }
+
+    .dropdown-content a:hover {
+      background: #e63946;
+    }
+
+    .dropdown:hover .dropdown-content {
+      display: block;
+    }
+
+    .dropdown.active .dropdown-content {
+      display: block;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+
+    .nav-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .logo-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 100%;
+      height: 100%;
+    }
+
+    .logo-center img {
+      height: 55px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      display: block;
+      transition: height 0.2s ease;
+    }
+
+    .nav-right {
+      flex-shrink: 0;
+    }
+
+    .cart-icon {
+      background: #2c2c2c;
+      border: none;
+      border-radius: 60px;
+      padding: 0 20px;
+      height: 48px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #f0f0f0;
+      transition: all 0.2s ease;
+      position: relative;
+      font-weight: 700;
+      font-size: 0.95rem;
+      font-family: inherit;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .cart-icon .material-icons {
+      font-size: 22px;
+    }
+
+    .cart-icon:hover {
+      background: #e63946;
+      transform: translateY(-2px);
+    }
+
+    .cart-icon:active {
+      transform: scale(0.96);
+    }
+
+    .cart-count {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #e63946;
+      color: white;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      font-size: 11px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 4px rgba(0,0,0,0.5);
+    }
+
+    @media (max-width: 900px) {
+      header { height: 64px; padding: 0 12px; gap: 8px; }
+      .logo-center img { height: 48px; }
+      .dropdown-btn { padding: 0 16px; height: 42px; font-size: 0.85rem; }
+      .cart-icon { padding: 0 16px; height: 42px; }
+      .dropdown-btn .material-icons, .cart-icon .material-icons { font-size: 20px; }
+    }
+
+    @media (max-width: 768px) {
+      header { height: 60px; padding: 0 10px; gap: 6px; }
+      .dropdown-btn { padding: 0 12px; height: 40px; gap: 6px; }
+      .dropdown-btn span:not(.material-icons) { display: none; }
+      .dropdown-btn .material-icons { font-size: 22px; margin: 0; }
+      .cart-icon { padding: 0 12px; height: 40px; gap: 6px; }
+      .cart-icon .material-icons { font-size: 22px; }
+      .cart-icon span:not(.material-icons):not(.cart-count) { display: none; }
+      .cart-count { top: -6px; right: -6px; width: 18px; height: 18px; font-size: 9px; }
+      .logo-center img { height: 42px; }
+      .dropdown-content { min-width: 160px; }
+      .dropdown-content a { padding: 12px 16px; font-size: 0.85rem; }
+    }
+
+    @media (max-width: 480px) {
+      header { height: 56px; padding: 0 8px; }
+      .logo-center img { height: 36px; }
+      .dropdown-btn { padding: 0 10px; height: 36px; }
+      .dropdown-btn .material-icons { font-size: 20px; }
+      .cart-icon { padding: 0 10px; height: 36px; }
+      .cart-icon .material-icons { font-size: 20px; }
+      .cart-count { width: 16px; height: 16px; font-size: 9px; top: -5px; right: -5px; }
+    }
+
+    @media (min-width: 1400px) {
+      .logo-center img { height: 62px; }
+      header { height: 80px; }
+      .dropdown-btn, .cart-icon { height: 52px; padding: 0 24px; font-size: 1rem; }
+      .dropdown-btn .material-icons, .cart-icon .material-icons { font-size: 24px; }
+    }
+
+    /* MODAL CARRITO */
+    .cart-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cart-modal.active {
+      display: flex;
+    }
+
+    .cart-content {
+      background: #121212;
+      width: 90%;
+      max-width: 550px;
+      max-height: 85vh;
+      border-radius: 32px;
+      padding: 24px 20px;
+      overflow-y: auto;
+      border: 1px solid #2c2c2c;
+    }
+
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .cart-header h2 { font-size: 1.5rem; }
+    .close-btn { background: #2c2c2c; border: none; padding: 8px 18px; border-radius: 60px; color: white; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+    .close-btn:hover { background: #e63946; transform: translateY(-2px); }
+    .cart-list { margin: 15px 0; }
+    .cart-item { background: #1a1a1a; border-radius: 24px; padding: 16px; margin-bottom: 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+    .cart-item-info { flex: 2; min-width: 130px; }
+    .cart-item-name { font-weight: bold; }
+    .cart-item-price { font-size: 0.85rem; color: #bbb; margin-top: 4px; }
+    .cart-item-qty { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .qty-btn { background: #2c2c2c; color: white; border: none; width: 32px; height: 32px; border-radius: 60px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+    .qty-btn:hover { background: #e63946; transform: translateY(-2px); }
+    .remove-btn { background: #b91c1c; padding: 8px 14px; border-radius: 60px; font-size: 0.75rem; font-weight: bold; border: none; color: white; cursor: pointer; transition: all 0.2s; }
+    .remove-btn:hover { background: #ff4444; transform: translateY(-2px); }
+    .cart-total { font-size: 1.2rem; text-align: right; border-top: 2px solid #2c2c2c; padding-top: 18px; margin-top: 10px; font-weight: bold; }
+    .cart-empty { text-align: center; padding: 40px 20px; color: #aaa;display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .checkout-btn { background: #25D366; color: black; font-weight: bold; width: 100%; padding: 14px; border-radius: 60px; border: none; font-size: 1rem; margin-top: 20px; cursor: pointer; transition: all 0.2s;gap:8px;display: flex;align-items: center;justify-content: center;}
+    .checkout-btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
+
+    /* CONTENIDO PRINCIPAL */
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px 16px;
+    }
+
+    /* BARRA DE BÚSQUEDA */
+    .search-section {
+      padding: 16px 16px 0 16px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .search-container-modern {
+      display: flex;
+      align-items: center;
+      background: #1e1e1e;
+      border-radius: 60px;
+      padding: 6px 18px;
+      gap: 12px;
+      border: 1px solid #2c2c2c;
+      margin-bottom: 8px;
+    }
+    
+    .search-container-modern .material-icons {
+      color: #aaa;
+      font-size: 20px;
+    }
+    
+    #searchInput {
+      background: transparent;
+      border: none;
+      padding: 12px 0;
+      color: white;
+      font-size: 1rem;
+      width: 100%;
+      outline: none;
+    }
+    
+    #searchInput::placeholder {
+      color: #888;
+      font-weight: 400;
+    }
+
+    /* RESULTADOS DE BÚSQUEDA */
+    .resultados-section {
+      padding: 20px 16px;
+      display: none;
+    }
+
+    .resultados-section.active {
+      display: block;
+    }
+
+    .resultados-section h2 {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #ffffff, #aaaaaa);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    #resultadosProductos {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 24px;
+    }
+
+    .main-content.hidden {
+      display: none;
+    }
+
+    /* FILTROS - CENTRADOS Y RESPONSIVOS SIN SUPERPOSICIÓN */
+    .filters-wrapper {
+      margin-bottom: 30px;
+    }
+
+    .filters {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 15px;
+      flex-wrap: nowrap;
+    }
+
+    .filter-group, .sort-group, .volume-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #1a1a1a;
+      padding: 4px 16px;
+      border-radius: 60px;
+      border: 1px solid #2c2c2c;
+      transition: all 0.2s ease;
+    }
+
+    .filter-group label, .sort-group label, .volume-group label {
+      color: #aaa;
+      font-size: 0.8rem;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .filter-group select, .sort-group select, .volume-group select {
+      background-color: transparent;
+      border: none;
+      color: #f0f0f0;
+      padding: 8px 0;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-weight: 500;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      text-align: center;
+      padding-right: 20px;
+      background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23aaaaaa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+      background-repeat: no-repeat;
+      background-position: right center;
+      background-size: 14px;
+    }
+
+    .filter-group select option, .sort-group select option, .volume-group select option {
+      background: #1e1e1e;
+      color: #f0f0f0;
+      text-align: center;
+    }
+
+    /* Responsive: ocultar etiquetas cuando no hay espacio */
+    @media (max-width: 620px) {
+      .filters {
+        gap: 10px;
+      }
+      .filter-group label, .sort-group label, .volume-group label {
+        display: none;
+      }
+      .filter-group, .sort-group, .volume-group {
+        padding: 4px 12px;
+      }
+      .filter-group select, .sort-group select, .volume-group select {
+        font-size: 0.8rem;
+        padding: 6px 18px 6px 8px;
+        text-align: center;
+        background-position: right 6px center;
+        background-size: 12px;
+      }
+    }
+
+    /* Reducción progresiva del tamaño cuando hay aún menos espacio */
+    @media (max-width: 500px) {
+      .filters {
+        gap: 8px;
+      }
+      .filter-group, .sort-group, .volume-group {
+        padding: 3px 8px;
+      }
+      .filter-group select, .sort-group select, .volume-group select {
+        font-size: 0.7rem;
+        padding: 5px 16px 5px 6px;
+        background-position: right 4px center;
+        background-size: 10px;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .filters {
+        gap: 6px;
+      }
+      .filter-group, .sort-group, .volume-group {
+        padding: 2px 6px;
+      }
+      .filter-group select, .sort-group select, .volume-group select {
+        font-size: 0.6rem;
+        padding: 4px 14px 4px 4px;
+        background-position: right 3px center;
+        background-size: 9px;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .filters {
+        gap: 5px;
+      }
+      .filter-group, .sort-group, .volume-group {
+        padding: 2px 5px;
+      }
+      .filter-group select, .sort-group select, .volume-group select {
+        font-size: 0.55rem;
+        padding: 3px 12px 3px 3px;
+        background-position: right 2px center;
+        background-size: 8px;
+      }
+    }
+
+    /* Badges de filtros activos */
+    .active-filters-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 8px 0;
+      background: transparent;
+      width: 100%;
+      margin-bottom: 25px;
+      min-height: 50px;
+    }
+
+    .active-filters-container:empty {
+      display: none;
+    }
+
+    .filter-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e63946;
+      color: white;
+      padding: 6px 14px;
+      border-radius: 60px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-badge .material-icons {
+      font-size: 14px;
+    }
+
+    .filter-badge:hover {
+      background: #c1121f;
+      transform: translateY(-1px);
+    }
+
+    .clear-all-badge {
+      background: #2c2c2c;
+      color: #f0f0f0;
+    }
+
+    .clear-all-badge:hover {
+      background: #555;
+    }
+
+    .products-separator {
+      margin-top: 5px;
+    }
+
+    /* PAGINACIÓN */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin: 40px 0 30px;
+      flex-wrap: wrap;
+    }
+
+    .page-btn {
+      background: #2c2c2c;
+      border: none;
+      color: #f0f0f0;
+      min-width: 48px;
+      height: 48px;
+      padding: 0 16px;
+      border-radius: 60px;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      font-family: inherit;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-btn:hover {
+      background: #e63946;
+      transform: translateY(-2px);
+    }
+
+    .page-btn.active {
+      background: #e63946;
+      color: white;
+      box-shadow: 0 4px 12px rgba(230,57,70,0.4);
+    }
+
+    .page-btn:active {
+      transform: scale(0.96);
+    }
+
+    .page-btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+      transform: none;
+    }
+
+    /* GRID PRODUCTOS */
+    .productos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 24px;
+      margin-bottom: 20px;
+    }
+
+    .card-catalogo {
+      background: #151515;
+      border-radius: 24px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      border: 1px solid #2a2a2a;
+    }
+
+    .card-catalogo:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+    }
+
+    .card-catalogo:active {
+      transform: scale(0.98);
+    }
+
+    .card-catalogo img {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: contain;
+      background: #0f0f0f;
+      padding: 12px;
+    }
+
+    .card-catalogo-info {
+      padding: 14px;
+    }
+
+    .card-catalogo-name {
+      font-weight: bold;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+      line-height: 1.3;
+      min-height: 42px;
+    }
+
+    .card-catalogo-category {
+      font-size: 0.7rem;
+      color: #ffaa44;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .card-catalogo-price {
+      color: #4caf50;
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .card-catalogo-btn {
+      width: 100%;
+      padding: 12px;
+      background: #2c2c2c;
+      color: #f0f0f0;
+      border: none;
+      border-radius: 60px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .card-catalogo-btn:hover {
+      background: #e63946;
+      transform: translateY(-2px);
+    }
+
+    .card-catalogo-btn:active {
+      transform: scale(0.96);
+    }
+
+    @media (max-width: 640px) {
+      .productos-grid, #resultadosProductos {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+      }
+      .card-catalogo-name { font-size: 0.8rem; min-height: 38px; }
+      .card-catalogo-price { font-size: 1rem; }
+      .page-btn { min-width: 42px; height: 42px; padding: 0 12px; font-size: 0.9rem; }
+      .card-catalogo-btn { padding: 10px; font-size: 0.8rem; }
+      .products-separator { margin-top: 15px; }
+    }
+
+    @media (max-width: 480px) {
+      .productos-grid, #resultadosProductos {
+        grid-template-columns: 1fr;
+      }
+      .card-catalogo {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 12px;
+      }
+      .card-catalogo img {
+        width: 100px;
+        aspect-ratio: 1/1;
+        padding: 8px;
+      }
+      .card-catalogo-info {
+        flex: 1;
+        padding: 0;
+      }
+      .card-catalogo-name {
+        min-height: auto;
+      }
+      .card-catalogo-btn { padding: 8px; font-size: 0.75rem; }
+    }
+
+    @media (min-width: 1024px) {
+      .productos-grid, #resultadosProductos {
+        grid-template-columns: repeat(5, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="nav-left">
+    <div class="dropdown" id="menuDropdown">
+      <button class="dropdown-btn" id="menuBtn">
+        <span class="material-icons">menu</span>
+      </button>
+      <div class="dropdown-content">
+        <a id="homeMenuItem">
+          <span class="material-icons">home</span>
+          Inicio
+        </a>
+        <a id="catalogoMenuItem">
+          <span class="material-icons">list</span>
+          Catálogo
+        </a>
+      </div>
+    </div>
+  </div>
+  <div class="nav-center">
+    <div class="logo-center">
+      <a href="index.html">
+        <img src="tit.png" alt="Pingouin Parfums" onerror="this.src='https://placehold.co/200x60/111/white?text=Pingouin'">
+      </a>
+    </div>
+  </div>
+  <div class="nav-right">
+    <button class="cart-icon" onclick="toggleCart()">
+      <span class="material-icons">shopping_bag</span>
+      <span class="cart-count" id="cartCount" style="display: none;">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- BARRA DE BÚSQUEDA -->
+<div class="search-section">
+  <div class="search-container-modern">
+    <span class="material-icons">search</span>
+    <input type="text" id="searchInput" placeholder="Buscar perfume árabe, diseñador...">
+  </div>
+</div>
+
+<div class="cart-modal" id="cartModal">
+  <div class="cart-content">
+    <div class="cart-header">
+      <h2><span class="material-icons">shopping_bag</span>Carrito</h2>
+      <button class="close-btn" onclick="toggleCart()"><span class="material-icons">close</span></button>
+    </div>
+    <div class="cart-list" id="cartList">
+      <div class="cart-empty"><span class="material-icons">shopping_bag</span>El carrito está vacío</div>
+    </div>
+    <div class="cart-total">Total: $<span id="cartTotal">0</span></div>
+    <button class="checkout-btn" onclick="checkout()">Proceder al pago<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-whatsapp" viewBox="0 0 16 16">
+  <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/></svg></button>
+  </div>
+</div>
+
+<!-- RESULTADOS DE BÚSQUEDA -->
+<section class="resultados-section" id="resultadosSection">
+  <h2>Resultados de búsqueda</h2>
+  <div id="resultadosProductos" class="productos-grid"></div>
+</section>
+
+<!-- CONTENIDO PRINCIPAL DEL CATÁLOGO -->
+<div class="container main-content" id="mainContent">
+  <div class="filters-wrapper">
+    <div class="filters">
+      <div class="filter-group">
+        <label for="filterSelect">Categoría:</label>
+        <select id="filterSelect">
+          <option value="todos">Todos</option>
+          <option value="arabe">Árabes</option>
+          <option value="disenador">Diseñador</option>
+        </select>
+      </div>
+      <div class="volume-group">
+        <label for="volumeSelect">Cantidad:</label>
+        <select id="volumeSelect">
+          <option value="todos">Todas</option>
+        </select>
+      </div>
+      <div class="sort-group">
+        <label for="sortSelect">Ordenar:</label>
+        <select id="sortSelect">
+          <option value="az">A-Z</option>
+          <option value="precioAsc">Menor Precio</option>
+          <option value="precioDesc">Mayor Precio</option>
+        </select>
+      </div>
+    </div>
+    
+    <div id="activeFiltersContainer"></div>
+  </div>
+  
+  <div class="products-separator"></div>
+  
+  <div class="productos-grid" id="productosCatalog"></div>
+  
+  <div class="pagination" id="paginationContainer"></div>
+</div>
+
+<script>
+  const DB_URL = './catalogo.db';
+  let SQL_DB = null;
+  let PRODUCTOS = [];
+  let filteredSortedList = [];
+  let cart = JSON.parse(localStorage.getItem('cart')) || [];
+  let currentSort = 'az';
+  let currentFilter = 'todos';
+  let currentVolume = 'todos';
+  let currentPage = 1;
+  const ITEMS_PER_PAGE = 10;
+
+  async function initDatabase() {
+    if (SQL_DB) return;
+    const SQL = await initSqlJs({ locateFile: file => 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/' + file });
+    const response = await fetch(DB_URL);
+    if (!response.ok) throw new Error('No se pudo cargar la base de datos');
+    const buffer = await response.arrayBuffer();
+    SQL_DB = new SQL.Database(new Uint8Array(buffer));
+  }
+
+  async function loadProducts() {
+    try {
+      await initDatabase();
+      const result = SQL_DB.exec('SELECT slug, perfume, precio, imagen1, imagen2, category, descripcion, volumen, tipo, durabilidad, "precio-otros" FROM "CATÁLOGO"');
+      if (!result.length) {
+        PRODUCTOS = [];
+        return;
+      }
+      const { columns, values } = result[0];
+      PRODUCTOS = values.map(row => Object.fromEntries(row.map((value, index) => [columns[index], value])));
+    } catch (error) {
+      console.error(error);
+      PRODUCTOS = [];
+    }
+  }
+
+  function getUniqueVolumes() {
+    const volumes = new Set();
+    PRODUCTOS.forEach(prod => {
+      if (prod.volumen && prod.volumen.trim() !== '') {
+        volumes.add(prod.volumen);
+      }
+    });
+    return Array.from(volumes).sort((a, b) => {
+      const numA = parseInt(a);
+      const numB = parseInt(b);
+      if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+      return a.localeCompare(b);
+    });
+  }
+
+  function updateVolumeSelect() {
+    const volumeSelect = document.getElementById('volumeSelect');
+    if (!volumeSelect) return;
+    
+    const volumes = getUniqueVolumes();
+    volumeSelect.innerHTML = '<option value="todos">Todas</option>';
+    
+    volumes.forEach(volume => {
+      const option = document.createElement('option');
+      option.value = volume;
+      option.textContent = volume;
+      volumeSelect.appendChild(option);
+    });
+    
+    if (currentVolume !== 'todos' && volumes.includes(currentVolume)) {
+      volumeSelect.value = currentVolume;
+    } else {
+      currentVolume = 'todos';
+      volumeSelect.value = 'todos';
+    }
+  }
+
+  function updateActiveFiltersBadges() {
+    const container = document.getElementById('activeFiltersContainer');
+    if (!container) return;
+    
+    const activeFilters = [];
+    
+    if (currentFilter !== 'todos') {
+      const filterText = currentFilter === 'arabe' ? 'Árabes' : 'Diseñador';
+      activeFilters.push({ type: 'category', label: filterText, value: currentFilter });
+    }
+    
+    if (currentVolume !== 'todos') {
+      activeFilters.push({ type: 'volume', label: currentVolume, value: currentVolume });
+    }
+    
+    if (activeFilters.length === 0) {
+      container.innerHTML = '';
+      return;
+    }
+    
+    container.innerHTML = `
+      ${activeFilters.map(filter => `
+        <span class="filter-badge" onclick="clearFilter('${filter.type}')">
+          ${filter.label}
+          <span class="material-icons">close</span>
+        </span>
+      `).join('')}
+      <span class="filter-badge clear-all-badge" onclick="clearAllFilters()">
+        Limpiar todo
+        <span class="material-icons">clear_all</span>
+      </span>
+    `;
+  }
+
+  window.clearFilter = function(type) {
+    if (type === 'category') {
+      currentFilter = 'todos';
+      document.getElementById('filterSelect').value = 'todos';
+    } else if (type === 'volume') {
+      currentVolume = 'todos';
+      document.getElementById('volumeSelect').value = 'todos';
+    }
+    refreshCatalogAndPagination(true);
+    updateActiveFiltersBadges();
+  };
+
+  window.clearAllFilters = function() {
+    currentFilter = 'todos';
+    currentVolume = 'todos';
+    document.getElementById('filterSelect').value = 'todos';
+    document.getElementById('volumeSelect').value = 'todos';
+    refreshCatalogAndPagination(true);
+    updateActiveFiltersBadges();
+  };
+
+  function normalizeText(text) {
+    if (!text) return '';
+    return text.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase();
+  }
+
+  function initSearch() {
+    const searchInput = document.getElementById('searchInput');
+    const resultadosSection = document.getElementById('resultadosSection');
+    const resultadosContainer = document.getElementById('resultadosProductos');
+    const mainContent = document.getElementById('mainContent');
+
+    searchInput.addEventListener('input', function(e) {
+      const term = e.target.value.trim().toLowerCase();
+
+      if (term === '') {
+        resultadosSection.classList.remove('active');
+        mainContent.classList.remove('hidden');
+        return;
+      }
+
+      const normalizedTerm = normalizeText(term);
+      const filtered = PRODUCTOS.filter(prod => {
+        return normalizeText(prod.perfume).includes(normalizedTerm) ||
+               normalizeText(prod.category).includes(normalizedTerm) ||
+               (prod.tipo && normalizeText(prod.tipo).includes(normalizedTerm));
+      });
+      
+      resultadosContainer.innerHTML = '';
+      if (filtered.length === 0) {
+        resultadosContainer.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px;">🔍 No encontramos perfumes con esa búsqueda. ¡Prueba con "árabe" o "diseñador"!</div>';
+      } else {
+        filtered.forEach(prod => {
+          resultadosContainer.appendChild(crearCard(prod, true));
+        });
+      }
+      
+      resultadosSection.classList.add('active');
+      mainContent.classList.add('hidden');
+    });
+  }
+
+  function applyFilterAndSort() {
+    let lista = [...PRODUCTOS];
+    
+    if (currentFilter === 'arabe') {
+      lista = lista.filter(item => item.category === 'arabe');
+    } else if (currentFilter === 'disenador') {
+      lista = lista.filter(item => item.category === 'disenador');
+    }
+    
+    if (currentVolume !== 'todos') {
+      lista = lista.filter(item => item.volumen === currentVolume);
+    }
+    
+    if (currentSort === 'precioAsc') {
+      lista.sort((a, b) => a.precio - b.precio);
+    } else if (currentSort === 'precioDesc') {
+      lista.sort((a, b) => b.precio - a.precio);
+    } else {
+      lista.sort((a, b) => a.perfume.localeCompare(b.perfume, 'es'));
+    }
+    filteredSortedList = lista;
+  }
+
+  function renderCurrentPage() {
+    const contenedor = document.getElementById('productosCatalog');
+    if (!contenedor) return;
+    contenedor.innerHTML = '';
+
+    const totalPages = Math.ceil(filteredSortedList.length / ITEMS_PER_PAGE);
+    if (totalPages === 0) {
+      contenedor.innerHTML = '<div style="text-align:center; padding:40px; grid-column: 1 / -1;">No hay productos disponibles.</div>';
+      updatePaginationButtons(totalPages);
+      return;
+    }
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+    
+    const startIdx = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIdx = startIdx + ITEMS_PER_PAGE;
+    const pageProducts = filteredSortedList.slice(startIdx, endIdx);
+    
+    pageProducts.forEach(perfume => {
+      contenedor.appendChild(crearCard(perfume, false));
+    });
+    
+    updatePaginationButtons(totalPages);
+  }
+
+  function updatePaginationButtons(totalPages) {
+    const pagContainer = document.getElementById('paginationContainer');
+    if (!pagContainer) return;
+    if (totalPages <= 1 && filteredSortedList.length <= ITEMS_PER_PAGE) {
+      pagContainer.innerHTML = '';
+      return;
+    }
+    
+    let buttonsHtml = '';
+    buttonsHtml += `<button class="page-btn" data-page="prev" ${currentPage === 1 ? 'disabled' : ''}>‹</button>`;
+    
+    const maxVisible = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisible - 1);
+    if (endPage - startPage + 1 < maxVisible) {
+      startPage = Math.max(1, endPage - maxVisible + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+      const activeClass = (i === currentPage) ? 'active' : '';
+      buttonsHtml += `<button class="page-btn ${activeClass}" data-page="${i}">${i}</button>`;
+    }
+    
+    buttonsHtml += `<button class="page-btn" data-page="next" ${currentPage === totalPages ? 'disabled' : ''}>›</button>`;
+    
+    pagContainer.innerHTML = buttonsHtml;
+    
+    document.querySelectorAll('.page-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const pageVal = btn.getAttribute('data-page');
+        if (pageVal === 'prev' && currentPage > 1) {
+          currentPage--;
+          renderCurrentPage();
+        } else if (pageVal === 'next' && currentPage < totalPages) {
+          currentPage++;
+          renderCurrentPage();
+        } else if (!isNaN(parseInt(pageVal))) {
+          currentPage = parseInt(pageVal);
+          renderCurrentPage();
+        }
+      });
+    });
+  }
+
+  function crearCard(producto, isSearchResult = false) {
+    const card = document.createElement('div');
+    card.className = 'card-catalogo';
+    card.onclick = (e) => {
+      if (e.target.tagName !== 'BUTTON' && !e.target.closest('.card-catalogo-btn')) irAProducto(producto.slug);
+    };
+    const imagen = producto.imagen1 || producto.imagen2 || 'https://placehold.co/400x400/222/white?text=Perfume';
+    const precioOtros = producto['precio-otros'] ? Number(producto['precio-otros']).toLocaleString('es-AR') : '0';
+    card.innerHTML = `
+      <img src="${imagen}" alt="${escapeHtml(producto.perfume)}" loading="lazy" onerror="this.src='https://placehold.co/400x400/222/white?text=Perfume'">
+      <div class="card-catalogo-info">
+        <div class="card-catalogo-category">${producto.category === 'arabe' ? 'Árabe' : 'Diseñador'}</div>
+        <div class="card-catalogo-name">${escapeHtml(producto.perfume)}</div>
+        ${producto.volumen ? `<div style="font-size:0.7rem; color:#aaa; margin-bottom:4px;">${escapeHtml(producto.volumen)}</div>` : ''}
+        <div class="card-catalogo-price">$${Number(producto.precio).toLocaleString('es-AR')}</div>
+        <div class="card-catalogo-price" style="color: #a80003; font-size:0.8rem;">Otros: $${precioOtros}</div>
+        <button class="card-catalogo-btn" onclick="event.stopPropagation(); addToCart('${escapeHtml(producto.perfume).replace(/'/g, "\\'")}', ${producto.precio})">
+          Agregar al carrito
+        </button>
+      </div>
+    `;
+    return card;
+  }
+
+  function irAProducto(slug) {
+    window.location.href = `producto.html?slug=${encodeURIComponent(slug)}`;
+  }
+
+  function addToCart(nombre, precio) {
+    const existing = cart.find(item => item.name === nombre);
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.push({ name: nombre, price: precio, quantity: 1 });
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
+    renderCart();
+    mostrarToast(`${nombre} agregado ✓`);
+  }
+
+  function mostrarToast(msg) {
+    const toast = document.createElement('div');
+    toast.innerText = msg;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.backgroundColor = '#2c2c2c';
+    toast.style.color = '#fff';
+    toast.style.padding = '10px 20px';
+    toast.style.borderRadius = '60px';
+    toast.style.zIndex = '2000';
+    toast.style.fontWeight = 'bold';
+    toast.style.fontSize = '0.9rem';
+    toast.style.boxShadow = '0 4px 12px black';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 1800);
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  function refreshCatalogAndPagination(resetPage = true) {
+    applyFilterAndSort();
+    if (resetPage) currentPage = 1;
+    renderCurrentPage();
+  }
+
+  function setupFilters() {
+    const filterSelect = document.getElementById('filterSelect');
+    const sortSelect = document.getElementById('sortSelect');
+    const volumeSelect = document.getElementById('volumeSelect');
+    
+    filterSelect.addEventListener('change', () => {
+      currentFilter = filterSelect.value;
+      refreshCatalogAndPagination(true);
+      updateActiveFiltersBadges();
+    });
+    
+    sortSelect.addEventListener('change', () => {
+      currentSort = sortSelect.value;
+      refreshCatalogAndPagination(true);
+    });
+    
+    volumeSelect.addEventListener('change', () => {
+      currentVolume = volumeSelect.value;
+      refreshCatalogAndPagination(true);
+      updateActiveFiltersBadges();
+    });
+  }
+
+  function loadCart() {
+    const stored = localStorage.getItem('cart');
+    cart = stored ? JSON.parse(stored) : [];
+    updateCartCount();
+  }
+
+  function removeFromCart(name) {
+    cart = cart.filter(item => item.name !== name);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
+    renderCart();
+  }
+
+  function updateQuantity(name, delta) {
+    const item = cart.find(i => i.name === name);
+    if (!item) return;
+    item.quantity += delta;
+    if (item.quantity <= 0) {
+      removeFromCart(name);
+    } else {
+      localStorage.setItem('cart', JSON.stringify(cart));
+      updateCartCount();
+      renderCart();
+    }
+  }
+
+  function updateCartCount() {
+    const totalQty = cart.reduce((acc, item) => acc + item.quantity, 0);
+    const countSpan = document.getElementById('cartCount');
+    if (totalQty > 0) {
+      countSpan.textContent = totalQty;
+      countSpan.style.display = 'flex';
+    } else {
+      countSpan.style.display = 'none';
+    }
+  }
+
+  function renderCart() {
+    const cartList = document.getElementById('cartList');
+    if (!cartList) return;
+    if (cart.length === 0) {
+      cartList.innerHTML = '<div class="cart-empty"><span class="material-icons">shopping_bag</span>El carrito está vacío</div>';
+      document.getElementById('cartTotal').textContent = '0';
+      return;
+    }
+    let total = 0;
+    let html = '';
+    cart.forEach(item => {
+      const subtotal = item.price * item.quantity;
+      total += subtotal;
+      html += `
+        <div class="cart-item">
+          <div class="cart-item-info">
+            <div class="cart-item-name">${escapeHtml(item.name)}</div>
+            <div class="cart-item-price">$${item.price.toLocaleString('es-AR')} c/u</div>
+          </div>
+          <div class="cart-item-qty">
+            <button class="qty-btn" onclick="updateQuantity('${escapeHtml(item.name).replace(/'/g, "\\'")}', -1)">−</button>
+            <span style="min-width: 28px; text-align:center;">${item.quantity}</span>
+            <button class="qty-btn" onclick="updateQuantity('${escapeHtml(item.name).replace(/'/g, "\\'")}', 1)">+</button>
+            <button class="remove-btn" onclick="removeFromCart('${escapeHtml(item.name).replace(/'/g, "\\'")}')"><span class="material-icons" style="font-size:16px;">delete</span></button>
+          </div>
+        </div>
+      `;
+    });
+    cartList.innerHTML = html;
+    document.getElementById('cartTotal').textContent = total.toLocaleString('es-AR');
+  }
+
+  function toggleCart() {
+    const modal = document.getElementById('cartModal');
+    modal.classList.toggle('active');
+    renderCart();
+  }
+
+  function checkout() {
+    if (cart.length === 0) {
+      alert('🛑 El carrito está vacío. Agrega productos para continuar.');
+      return;
+    }
+    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    let mensaje = '🛍️ *Pingouin Parfums - Pedido desde Catálogo*%0A%0A';
+    cart.forEach((item, idx) => {
+      mensaje += `${idx + 1}. ${item.name}%0A   Cantidad: ${item.quantity}  |  $${item.price.toLocaleString('es-AR')}%0A`;
+    });
+    mensaje += `%0A*TOTAL: $${total.toLocaleString('es-AR')}*%0A%0A¡Gracias por elegir Pingouin!`;
+    const url = `https://wa.me/543541396860?text=${mensaje}`;
+    window.open(url, '_blank');
+    cart = [];
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
+    renderCart();
+    toggleCart();
+  }
+
+  function setupDropdown() {
+    const dropdown = document.getElementById('menuDropdown');
+    const menuBtn = document.getElementById('menuBtn');
+    
+    if (menuBtn && dropdown) {
+      menuBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dropdown.classList.toggle('active');
+      });
+      
+      document.addEventListener('click', (e) => {
+        if (!dropdown.contains(e.target)) {
+          dropdown.classList.remove('active');
+        }
+      });
+    }
+    
+    const homeMenuItem = document.getElementById('homeMenuItem');
+    const catalogoMenuItem = document.getElementById('catalogoMenuItem');
+    
+    if (homeMenuItem) {
+      homeMenuItem.addEventListener('click', () => {
+        window.location.href = 'index.html';
+      });
+    }
+    if (catalogoMenuItem) {
+      catalogoMenuItem.addEventListener('click', () => {
+        window.location.href = 'catalogo.html';
+      });
+    }
+  }
+
+  function setInitialFilterFromHash() {
+    const hash = window.location.hash;
+    if (hash === '#arabes') currentFilter = 'arabe';
+    else if (hash === '#disenador') currentFilter = 'disenador';
+    else currentFilter = 'todos';
+    const filterSelect = document.getElementById('filterSelect');
+    if (filterSelect) filterSelect.value = currentFilter;
+  }
+
+  window.addToCart = addToCart;
+  window.removeFromCart = removeFromCart;
+  window.updateQuantity = updateQuantity;
+  window.toggleCart = toggleCart;
+  window.checkout = checkout;
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    loadCart();
+    await loadProducts();
+    updateVolumeSelect();
+    setInitialFilterFromHash();
+    setupFilters();
+    applyFilterAndSort();
+    currentPage = 1;
+    renderCurrentPage();
+    setupDropdown();
+    initSearch();
+    updateActiveFiltersBadges();
+  });
+</script>
+</body>
+</html>

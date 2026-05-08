@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Detalle del Producto - Pingouin Parfums</title>
+  <link rel="icon" href="logopag.png">
+  <!-- Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #0a0a0a;
+      color: #f0f0f0;
+      overflow-x: hidden;
+      width: 100%;
+    }
+
+    /* ========== HEADER CON FLECHA ATRÁS ========== */
+    header {
+      background: #000000;
+      padding: 0 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+      gap: 12px;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    /* BOTÓN FLECHA ATRÁS - MISMO ESTILO UNIFICADO */
+    .back-btn {
+      background: #2c2c2c;
+      border: none;
+      color: #f0f0f0;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 0 20px;
+      height: 48px;
+      border-radius: 60px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .back-btn .material-icons {
+      font-size: 22px;
+    }
+
+    .back-btn:hover {
+      background: #e63946;
+      transform: translateY(-2px);
+      box-shadow: 0 0 12px rgba(230,57,70,0.6);
+    }
+
+    .back-btn:active {
+      transform: scale(0.96);
+    }
+
+    .nav-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .logo-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      max-width: 100%;
+      height: 100%;
+    }
+
+    .logo-center img {
+      height: 55px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      display: block;
+      transition: height 0.2s ease;
+    }
+
+    .nav-right {
+      flex-shrink: 0;
+    }
+
+    /* Botón carrito - MISMO ESTILO UNIFICADO */
+    .cart-icon {
+      background: #2c2c2c;
+      border: none;
+      border-radius: 60px;
+      padding: 0 20px;
+      height: 48px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #f0f0f0;
+      transition: all 0.2s ease;
+      position: relative;
+      font-weight: 700;
+      font-size: 0.95rem;
+      font-family: inherit;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .cart-icon .material-icons {
+      font-size: 22px;
+    }
+
+    .cart-icon:hover {
+      background: #e63946;
+      transform: translateY(-2px);
+      box-shadow: 0 0 12px rgba(230,57,70,0.6);
+    }
+
+    .cart-icon:active {
+      transform: scale(0.96);
+    }
+
+    .cart-count {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: #e63946;
+      color: white;
+      border-radius: 50%;
+      width: 22px;
+      height: 22px;
+      font-size: 11px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 4px rgba(0,0,0,0.5);
+    }
+
+    /* RESPONSIVE HEADER */
+    @media (max-width: 900px) {
+      header { height: 64px; padding: 0 12px; gap: 8px; }
+      .logo-center img { height: 48px; }
+      .back-btn { padding: 0 16px; height: 42px; font-size: 0.85rem; }
+      .cart-icon { padding: 0 16px; height: 42px; }
+      .back-btn .material-icons, .cart-icon .material-icons { font-size: 20px; }
+    }
+
+    @media (max-width: 768px) {
+      header { height: 60px; padding: 0 10px; gap: 6px; }
+      .back-btn { padding: 0 12px; height: 40px; gap: 6px; }
+      .back-btn span:not(.material-icons) { display: none; }
+      .back-btn .material-icons { font-size: 22px; margin: 0; }
+      .cart-icon { padding: 0 12px; height: 40px; gap: 6px; }
+      .cart-icon .material-icons { font-size: 22px; }
+      .cart-icon span:not(.material-icons):not(.cart-count) { display: none; }
+      .cart-count { top: -6px; right: -6px; width: 18px; height: 18px; font-size: 9px; }
+      .logo-center img { height: 42px; }
+    }
+
+    @media (max-width: 480px) {
+      header { height: 56px; padding: 0 8px; }
+      .logo-center img { height: 36px; }
+      .back-btn { padding: 0 10px; height: 36px; }
+      .back-btn .material-icons { font-size: 20px; }
+      .cart-icon { padding: 0 10px; height: 36px; }
+      .cart-icon .material-icons { font-size: 20px; }
+      .cart-count { width: 16px; height: 16px; font-size: 9px; top: -5px; right: -5px; }
+    }
+
+    @media (min-width: 1400px) {
+      .logo-center img { height: 62px; }
+      header { height: 80px; }
+      .back-btn, .cart-icon { height: 52px; padding: 0 24px; font-size: 1rem; }
+      .back-btn .material-icons, .cart-icon .material-icons { font-size: 24px; }
+    }
+
+    /* MODAL CARRITO */
+    .cart-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cart-modal.active {
+      display: flex;
+    }
+
+    .cart-content {
+      background: #121212;
+      width: 90%;
+      max-width: 550px;
+      max-height: 85vh;
+      border-radius: 32px;
+      padding: 24px 20px;
+      overflow-y: auto;
+      border: 1px solid #2c2c2c;
+    }
+
+    .cart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .cart-header h2 { font-size: 1.5rem; }
+    .close-btn { background: #2c2c2c; border: none; padding: 8px 18px; border-radius: 60px; color: white; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+    .close-btn:hover { background: #e63946; transform: translateY(-2px); }
+    .cart-list { margin: 15px 0; }
+    .cart-item { background: #1a1a1a; border-radius: 24px; padding: 16px; margin-bottom: 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
+    .cart-item-info { flex: 2; min-width: 130px; }
+    .cart-item-name { font-weight: bold; }
+    .cart-item-price { font-size: 0.85rem; color: #bbb; margin-top: 4px; }
+    .cart-item-qty { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .qty-btn { background: #2c2c2c; color: white; border: none; width: 32px; height: 32px; border-radius: 60px; font-weight: bold; cursor: pointer; transition: all 0.2s; }
+    .qty-btn:hover { background: #e63946; transform: translateY(-2px); }
+    .remove-btn { background: #b91c1c; padding: 8px 14px; border-radius: 60px; font-size: 0.75rem; font-weight: bold; border: none; color: white; cursor: pointer; transition: all 0.2s; }
+    .remove-btn:hover { background: #ff4444; transform: translateY(-2px); }
+    .cart-total { font-size: 1.2rem; text-align: right; border-top: 2px solid #2c2c2c; padding-top: 18px; margin-top: 10px; font-weight: bold; }
+    .cart-empty { text-align: center; padding: 40px 20px; color: #aaa;display: flex; align-items: center; justify-content: center; gap: 12px; }
+    .checkout-btn { background: #25D366; color: black; font-weight: bold; width: 100%; padding: 14px; border-radius: 60px; border: none; font-size: 1rem; margin-top: 20px; cursor: pointer; transition: all 0.2s;gap:8px;display: flex;align-items: center;justify-content: center;}
+    .checkout-btn:hover { transform: translateY(-2px); filter: brightness(1.05); }
+
+    /* CONTAINER PRINCIPAL */
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    /* PRODUCTO GRID */
+    .producto-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      background: #151515;
+      padding: 30px 28px;
+      border-radius: 32px;
+      transition: all 0.2s;
+      border: 1px solid #2a2a2a;
+    }
+
+    /* GALERÍA */
+    .producto-imagen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .producto-galeria {
+      position: relative;
+      width: 100%;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    .producto-imagen img {
+      width: 100%;
+      height: auto;
+      border-radius: 24px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      background: #0f0f0f;
+    }
+
+    .galeria-nav {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      padding: 0 8px;
+      pointer-events: none;
+    }
+
+    /* BOTONES DE CAMBIO DE IMAGEN */
+    .galeria-btn {
+      background: #2c2c2c;
+      border: none;
+      color: #f0f0f0;
+      padding: 10px 16px;
+      border-radius: 60px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      font-weight: bold;
+      transition: all 0.2s;
+      pointer-events: auto;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      font-family: inherit;
+    }
+
+    .galeria-btn:hover {
+      background: #e63946;
+      transform: translateY(-2px);
+      box-shadow: 0 0 12px rgba(230,57,70,0.6);
+    }
+
+    .galeria-btn:active {
+      transform: scale(0.96);
+    }
+
+    .galeria-indicador {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 6px 14px;
+      border-radius: 40px;
+    }
+
+    .galeria-puntos {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .galeria-puntos.active {
+      background: white;
+      transform: scale(1.2);
+    }
+
+    /* INFO PRODUCTO */
+    .producto-info h1 {
+      font-size: clamp(1.8rem, 5vw, 2.5rem);
+      margin-bottom: 16px;
+      letter-spacing: -0.3px;
+    }
+
+    .producto-precio {
+      font-size: clamp(1.6rem, 4.5vw, 2.2rem);
+      color: #4CAF50;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    .producto-descripcion {
+      font-size: 1rem;
+      color: #ccc;
+      line-height: 1.5;
+      margin-bottom: 28px;
+    }
+
+    .producto-detalles {
+      background: #0f0f0f;
+      padding: 20px;
+      border-radius: 24px;
+      margin-bottom: 28px;
+    }
+
+    .detalle-item {
+      margin-bottom: 14px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #2a2a2a;
+    }
+
+    .detalle-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .detalle-label {
+      color: #aaa;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+    }
+
+    .detalle-valor {
+      font-weight: 600;
+      color: #f0f0f0;
+      font-size: 1rem;
+    }
+
+    /* ACCIONES - BOTONES UNIFICADOS */
+    .product-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+
+    .cantidad-selector {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #111;
+      padding: 6px 16px;
+      border-radius: 60px;
+    }
+
+    /* Botones de cantidad */
+    .cantidad-selector button {
+      background: #2c2c2c;
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 60px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 1.2rem;
+      transition: all 0.2s;
+      font-family: inherit;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .cantidad-selector button:hover {
+      background: #e63946;
+      transform: translateY(-2px);
+      box-shadow: 0 0 12px rgba(230,57,70,0.6);
+    }
+
+    .cantidad-selector button:active {
+      transform: scale(0.96);
+    }
+
+    .cantidad-selector input {
+      background: #222;
+      color: white;
+      border: none;
+      width: 55px;
+      text-align: center;
+      padding: 8px 0;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    /* Botón AGREGAR */
+    .add-to-cart-btn {
+      flex: 1;
+      background: #2c2c2c;
+      color: #f0f0f0;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 60px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 1rem;
+      transition: all 0.2s;
+      white-space: nowrap;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: inherit;
+    }
+
+    .add-to-cart-btn:hover {
+      background: #e63946;
+      transform: translateY(-2px);
+      box-shadow: 0 0 14px rgba(230,57,70,0.7);
+    }
+
+    .add-to-cart-btn:active {
+      transform: scale(0.96);
+    }
+
+    .error-message {
+      text-align: center;
+      padding: 60px 20px;
+    }
+
+    .error-link {
+      background: #2c2c2c;
+      color: white;
+      padding: 10px 24px;
+      border-radius: 60px;
+      text-decoration: none;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+    .error-link:hover {
+      background: #e63946;
+      transform: translateY(-2px);
+      box-shadow: 0 0 12px rgba(230,57,70,0.6);
+    }
+
+    /* MEDIA QUERIES */
+    @media (max-width: 850px) {
+      .producto-container {
+        grid-template-columns: 1fr;
+        gap: 28px;
+        padding: 24px 20px;
+      }
+      .producto-galeria { max-width: 360px; }
+      .product-actions { flex-direction: column; }
+      .add-to-cart-btn { white-space: normal; text-align: center; }
+    }
+
+    @media (max-width: 550px) {
+      .container { padding: 16px; }
+      .producto-container { padding: 18px; border-radius: 24px; }
+      .cantidad-selector { justify-content: center; }
+      .cart-item { flex-direction: column; align-items: flex-start; }
+      .cart-item-qty { width: 100%; justify-content: space-between; }
+      .cart-content { padding: 18px; }
+    }
+
+    @media (max-width: 380px) {
+      .galeria-btn { padding: 6px 12px; font-size: 1rem; }
+      .producto-info h1 { font-size: 1.6rem; }
+      .detalle-valor { font-size: 0.9rem; }
+    }
+
+    button:active { transform: scale(0.97); }
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button { opacity: 0; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="nav-left">
+    <!-- BOTÓN FLECHA ATRÁS -->
+    <button class="back-btn" onclick="window.history.back()">
+      <span class="material-icons">arrow_back</span>
+    </button>
+  </div>
+  
+  <div class="nav-center">
+    <div class="logo-center">
+      <a href="index.html">
+        <img src="tit.png" alt="Pingouin Parfums" onerror="this.src='https://placehold.co/200x60/111/white?text=Pingouin'">
+      </a>
+    </div>
+  </div>
+  
+  <div class="nav-right">
+    <button class="cart-icon" onclick="toggleCart()">
+      <span class="material-icons">shopping_bag</span>
+      <span class="cart-count" id="cartCount" style="display: none;">0</span>
+    </button>
+  </div>
+</header>
+
+<div class="cart-modal" id="cartModal">
+  <div class="cart-content">
+    <div class="cart-header">
+      <h2><span class="material-icons">shopping_bag</span>Carrito</h2>
+      <button class="close-btn" onclick="toggleCart()"><span class="material-icons">close</span></button>
+    </div>
+    <div class="cart-list" id="cartList">
+      <div class="cart-empty"><span class="material-icons">shopping_bag</span>El carrito está vacío</div>
+    </div>
+    <div class="cart-total">Total: $<span id="cartTotal">0</span></div>
+    <button class="checkout-btn" onclick="checkout()">Proceder al pago<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-whatsapp" viewBox="0 0 16 16">
+  <path d="M13.601 2.326A7.85 7.85 0 0 0 7.994 0C3.627 0 .068 3.558.064 7.926c0 1.399.366 2.76 1.057 3.965L0 16l4.204-1.102a7.9 7.9 0 0 0 3.79.965h.004c4.368 0 7.926-3.558 7.93-7.93A7.9 7.9 0 0 0 13.6 2.326zM7.994 14.521a6.6 6.6 0 0 1-3.356-.92l-.24-.144-2.494.654.666-2.433-.156-.251a6.56 6.56 0 0 1-1.007-3.505c0-3.626 2.957-6.584 6.591-6.584a6.56 6.56 0 0 1 4.66 1.931 6.56 6.56 0 0 1 1.928 4.66c-.004 3.639-2.961 6.592-6.592 6.592m3.615-4.934c-.197-.099-1.17-.578-1.353-.646-.182-.065-.315-.099-.445.099-.133.197-.513.646-.627.775-.114.133-.232.148-.43.05-.197-.1-.836-.308-1.592-.985-.59-.525-.985-1.175-1.103-1.372-.114-.198-.011-.304.088-.403.087-.088.197-.232.296-.346.1-.114.133-.198.198-.33.065-.134.034-.248-.015-.347-.05-.099-.445-1.076-.612-1.47-.16-.389-.323-.335-.445-.34-.114-.007-.247-.007-.38-.007a.73.73 0 0 0-.529.247c-.182.198-.691.677-.691 1.654s.71 1.916.81 2.049c.098.133 1.394 2.132 3.383 2.992.47.205.84.326 1.129.418.475.152.904.129 1.246.08.38-.058 1.171-.48 1.338-.943.164-.464.164-.86.114-.943-.049-.084-.182-.133-.38-.232"/></svg></button>
+  </div>
+</div>
+
+<div class="container">
+  <div id="productoContent"></div>
+</div>
+
+<script>
+  const DB_URL = './catalogo.db';
+  let SQL_DB = null;
+  let cart = [];
+  let cantidadActual = 1;
+  let imagenActual = 0;
+  let imagenesActuales = [];
+  let productoActual = null;
+
+  async function initDatabase() {
+    if (SQL_DB) return;
+    const SQL = await initSqlJs({ locateFile: file => 'https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/' + file });
+    const response = await fetch(DB_URL);
+    if (!response.ok) throw new Error('No se pudo cargar la base de datos');
+    const buffer = await response.arrayBuffer();
+    SQL_DB = new SQL.Database(new Uint8Array(buffer));
+  }
+
+  async function loadCart() {
+    cart = JSON.parse(localStorage.getItem('cart')) || [];
+    updateCartCount();
+  }
+
+  function getUrlParameter(param) {
+    return new URLSearchParams(window.location.search).get(param);
+  }
+
+  async function fetchProduct(slug) {
+    try {
+      await initDatabase();
+      const stmt = SQL_DB.prepare('SELECT slug, perfume, precio, imagen1, imagen2, category, descripcion, volumen, tipo, durabilidad, "precio-otros" FROM "CATÁLOGO" WHERE slug = ?');
+      stmt.bind([slug]);
+      if (!stmt.step()) {
+        stmt.free();
+        return null;
+      }
+      const row = stmt.getAsObject();
+      stmt.free();
+      return row;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+
+  async function renderProducto() {
+    const productId = getUrlParameter('slug');
+    const container = document.getElementById('productoContent');
+    if (!productId) {
+      container.innerHTML = `<div class="error-message"><h2><span class="material-icons" style="font-size:48px;">error_outline</span></h2><p>Falta el parámetro del perfume.</p><a href="catalogo.html" class="error-link"><span class="material-icons">list</span> Volver al catálogo</a></div>`;
+      return;
+    }
+
+    productoActual = await fetchProduct(productId);
+    if (!productoActual || !productoActual.perfume) {
+      container.innerHTML = `<div class="error-message"><h2><span class="material-icons" style="font-size:48px;">search_off</span></h2><p>El perfume que buscas no está disponible.</p><a href="catalogo.html" class="error-link"><span class="material-icons">list</span> Volver al catálogo</a></div>`;
+      return;
+    }
+
+    imagenesActuales = [productoActual.imagen1 || productoActual.imagen2].filter(Boolean);
+    if (productoActual.imagen2) imagenesActuales.push(productoActual.imagen2);
+    if (imagenesActuales.length === 0) {
+      imagenesActuales = ['https://placehold.co/600x600/222/fff?text=Perfume'];
+    }
+    imagenActual = 0;
+
+    const tieneGaleria = imagenesActuales.length > 1;
+    const puntosHTML = tieneGaleria ? `
+      <div class="galeria-indicador">
+        ${imagenesActuales.map((_, idx) => `<div class="galeria-puntos ${idx === 0 ? 'active' : ''}" data-index="${idx}"></div>`).join('')}
+      </div>
+    ` : '';
+
+    const navButtons = tieneGaleria ? `
+      <div class="galeria-nav">
+        <button class="galeria-btn" id="btnPrev" onclick="cambiarImagen(-1)"><span class="material-icons">chevron_left</span></button>
+        <button class="galeria-btn" id="btnNext" onclick="cambiarImagen(1)"><span class="material-icons">chevron_right</span></button>
+      </div>
+    ` : '';
+
+    container.innerHTML = `
+      <div class="producto-container">
+        <div class="producto-imagen">
+          <div class="producto-galeria">
+            <img id="productoMainImg" src="${imagenesActuales[0]}" alt="${escapeHTML(productoActual.perfume)}" loading="lazy" onerror="this.src='https://placehold.co/600x600/222/fff?text=Perfume'">
+            ${navButtons}
+            ${puntosHTML}
+          </div>
+        </div>
+        <div class="producto-info">
+          <h1>${escapeHTML(productoActual.perfume)}</h1>
+          <div class="producto-precio">$${Number(productoActual.precio).toLocaleString('es-AR')}</div>
+          <div class="producto-precio" style="color: #a80003; font-size: 1rem; margin-top: 6px;">Otros Locales: $${Number(productoActual['precio-otros']).toLocaleString('es-AR')}</div>
+          <div class="producto-descripcion">${escapeHTML(productoActual.descripcion || '')}</div>
+          <div class="producto-detalles">
+            <div class="detalle-item"><div class="detalle-label">Volumen</div><div class="detalle-valor">${escapeHTML(productoActual.volumen || '')}</div></div>
+            <div class="detalle-item"><div class="detalle-label">Tipo</div><div class="detalle-valor">${escapeHTML(productoActual.tipo || '')}</div></div>
+            <div class="detalle-item"><div class="detalle-label">Durabilidad</div><div class="detalle-valor">${escapeHTML(productoActual.durabilidad || '')}</div></div>
+          </div>
+          <div class="product-actions">
+            <div class="cantidad-selector">
+              <button onclick="decrementarCantidad()">−</button>
+              <input type="number" id="cantidadInput" value="1" min="1" readonly>
+              <button onclick="incrementarCantidad()">+</button>
+            </div>
+            <button class="add-to-cart-btn" onclick="addToCartProducto('${escapeHTML(productoActual.perfume).replace(/'/g, "\\'")}', ${productoActual.precio})">
+              <span class="material-icons">add_shopping_cart</span> Agregar al carrito
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    if (tieneGaleria) {
+      document.querySelectorAll('.galeria-puntos').forEach((punto, idx) => {
+        punto.addEventListener('click', () => irAImagen(idx));
+      });
+      actualizarBotonesGaleria();
+    }
+  }
+
+  function escapeHTML(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+
+  function actualizarGaleria() {
+    const img = document.getElementById('productoMainImg');
+    if (img && imagenesActuales[imagenActual]) img.src = imagenesActuales[imagenActual];
+    document.querySelectorAll('.galeria-puntos').forEach((p, idx) => {
+      p.classList.toggle('active', idx === imagenActual);
+    });
+    actualizarBotonesGaleria();
+  }
+
+  function actualizarBotonesGaleria() {
+    const btnPrev = document.getElementById('btnPrev');
+    const btnNext = document.getElementById('btnNext');
+    if (btnPrev) btnPrev.disabled = imagenActual === 0;
+    if (btnNext) btnNext.disabled = imagenActual === imagenesActuales.length - 1;
+  }
+
+  window.cambiarImagen = function(direccion) {
+    if (!imagenesActuales.length) return;
+    imagenActual = (imagenActual + direccion + imagenesActuales.length) % imagenesActuales.length;
+    actualizarGaleria();
+  };
+
+  window.irAImagen = function(index) {
+    if (index >= 0 && index < imagenesActuales.length) {
+      imagenActual = index;
+      actualizarGaleria();
+    }
+  };
+
+  window.incrementarCantidad = function() {
+    cantidadActual++;
+    const input = document.getElementById('cantidadInput');
+    if (input) input.value = cantidadActual;
+  };
+
+  window.decrementarCantidad = function() {
+    if (cantidadActual > 1) {
+      cantidadActual--;
+      const input = document.getElementById('cantidadInput');
+      if (input) input.value = cantidadActual;
+    }
+  };
+
+  function addToCartProducto(name, price) {
+    for (let i = 0; i < cantidadActual; i++) {
+      const existing = cart.find(item => item.name === name);
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        cart.push({ name, price, quantity: 1 });
+      }
+    }
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
+    renderCart();
+    mostrarToast(`${cantidadActual} unidad(es) de "${name}" agregada(s) al carrito`);
+    cantidadActual = 1;
+    const input = document.getElementById('cantidadInput');
+    if (input) input.value = 1;
+  }
+
+  function mostrarToast(msg) {
+    const toast = document.createElement('div');
+    toast.innerHTML = `<span class="material-icons" style="font-size:18px;">check_circle</span> ${msg}`;
+    toast.style.position = 'fixed';
+    toast.style.bottom = '20px';
+    toast.style.left = '50%';
+    toast.style.transform = 'translateX(-50%)';
+    toast.style.backgroundColor = '#2c2c2c';
+    toast.style.color = '#fff';
+    toast.style.padding = '10px 20px';
+    toast.style.borderRadius = '60px';
+    toast.style.zIndex = '2000';
+    toast.style.fontWeight = 'bold';
+    toast.style.fontSize = '0.9rem';
+    toast.style.boxShadow = '0 4px 12px black';
+    toast.style.display = 'flex';
+    toast.style.alignItems = 'center';
+    toast.style.gap = '8px';
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 1800);
+  }
+
+  function removeFromCart(name) {
+    cart = cart.filter(item => item.name !== name);
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
+    renderCart();
+  }
+
+  function updateQuantity(name, delta) {
+    const item = cart.find(i => i.name === name);
+    if (item) {
+      const newQty = item.quantity + delta;
+      if (newQty <= 0) {
+        removeFromCart(name);
+      } else {
+        item.quantity = newQty;
+        localStorage.setItem('cart', JSON.stringify(cart));
+        updateCartCount();
+        renderCart();
+      }
+    }
+  }
+
+  function updateCartCount() {
+    const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+    const countSpan = document.getElementById('cartCount');
+    if (countSpan) {
+      if (totalItems > 0) {
+        countSpan.textContent = totalItems;
+        countSpan.style.display = 'flex';
+      } else {
+        countSpan.style.display = 'none';
+      }
+    }
+  }
+
+  function renderCart() {
+    const cartList = document.getElementById('cartList');
+    if (!cartList) return;
+    if (cart.length === 0) {
+      cartList.innerHTML = '<div class="cart-empty"><span class="material-icons">shopping_bag</span>El carrito está vacío</div>';
+      document.getElementById('cartTotal').textContent = '0';
+      return;
+    }
+
+    let total = 0;
+    let html = '';
+    cart.forEach(item => {
+      const subtotal = item.price * item.quantity;
+      total += subtotal;
+      html += `
+        <div class="cart-item">
+          <div class="cart-item-info">
+            <div class="cart-item-name">${escapeHTML(item.name)}</div>
+            <div class="cart-item-price">$${item.price.toLocaleString('es-AR')} c/u</div>
+          </div>
+          <div class="cart-item-qty">
+            <button class="qty-btn" onclick="updateQuantity('${escapeHTML(item.name).replace(/'/g, "\\'")}', -1)">−</button>
+            <span style="min-width: 28px; text-align:center;">${item.quantity}</span>
+            <button class="qty-btn" onclick="updateQuantity('${escapeHTML(item.name).replace(/'/g, "\\'")}', 1)">+</button>
+            <button class="remove-btn" onclick="removeFromCart('${escapeHTML(item.name).replace(/'/g, "\\'")}')"><span class="material-icons" style="font-size:16px;">delete</span></button>
+          </div>
+        </div>
+      `;
+    });
+    cartList.innerHTML = html;
+    document.getElementById('cartTotal').textContent = total.toLocaleString('es-AR');
+  }
+
+  window.toggleCart = function() {
+    const modal = document.getElementById('cartModal');
+    if (!modal) return;
+    modal.classList.toggle('active');
+    renderCart();
+  };
+
+  window.checkout = function() {
+    if (cart.length === 0) {
+      alert('El carrito está vacío. Agrega productos antes de pagar.');
+      return;
+    }
+    const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    let mensaje = '🛍️ *Pedido de Pingouin Parfums*%0A%0A';
+    mensaje += '*Detalles del pedido:*%0A';
+    cart.forEach((item, index) => {
+      const subtotal = item.price * item.quantity;
+      mensaje += `${index + 1}. ${item.name}%0A   Cantidad: ${item.quantity}%0A   Precio unitario: $${item.price.toLocaleString('es-AR')}%0A   Subtotal: $${subtotal.toLocaleString('es-AR')}%0A%0A`;
+    });
+    mensaje += `*Total: $${total.toLocaleString('es-AR')}*`;
+    const urlWhatsApp = `https://wa.me/543541396860?text=${encodeURIComponent(mensaje)}`;
+    window.open(urlWhatsApp, '_blank');
+    cart = [];
+    localStorage.setItem('cart', JSON.stringify(cart));
+    updateCartCount();
+    renderCart();
+    toggleCart();
+  };
+
+  document.addEventListener('DOMContentLoaded', async function() {
+    loadCart();
+    await renderProducto();
+    window.addToCartProducto = addToCartProducto;
+    window.removeFromCart = removeFromCart;
+    window.updateQuantity = updateQuantity;
+  });
+</script>
+</body>
+</html>
